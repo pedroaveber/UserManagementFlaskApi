@@ -2,12 +2,16 @@ from flask import Flask, request, jsonify
 from database import db
 from models.user import User
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
+from bcrypt import hashpw, gensalt, checkpw
 
 app = Flask(__name__)
 
+# UTF-8
+app.config['JSON_AS_ASCII'] = False
+
 # Database configuration
 app.config['SECRET_KEY'] = 'super_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:admin123@127.0.0.1:3306/flask-crud'
 
 # Flask-Login configuration
 login_manager = LoginManager()
@@ -30,7 +34,9 @@ def sign_in():
   if username and password:
     user = User.query.filter_by(username=username).first()
 
-    if user and user.password == password:
+    does_password_match = checkpw(str.encode(password), str.encode(user.password))
+
+    if user and does_password_match:
       login_user(user)
       print(current_user.is_authenticated)
       return jsonify({ 'message': 'Usuário autenticado' }), 200
@@ -50,8 +56,10 @@ def create_user():
   username = body.get('username')
   password = body.get('password')
 
+  hashed_password = hashpw(str.encode(password), gensalt())
+
   if username and password:
-    user = User(username = username, password = password)
+    user = User(username = username, password = hashed_password, role = 'user')
 
     db.session.add(user)
     db.session.commit()
@@ -78,8 +86,13 @@ def update_user(id_user):
   password = body.get('password')
   user = User.query.get(id_user)
 
+  if id_user != current_user.id and current_user.role == 'user':
+    return jsonify({ 'message': 'Acesso negado' }), 403
+
   if user and password:
-    user.password = password
+    hashed_password = hashpw(str.encode(password), gensalt())
+
+    user.password = hashed_password
     db.session.commit()
 
     return jsonify({ 'message': 'Usuário atualizado' }), 200
@@ -90,6 +103,9 @@ def update_user(id_user):
 @login_required
 def delete_user(id_user):
   user = User.query.get(id_user)
+
+  if current_user.role != 'admin':
+    return jsonify({ 'message': 'Acesso negado' }), 403
 
   if user and id_user != current_user.id:
     db.session.delete(user)

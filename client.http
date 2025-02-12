@@ -5,8 +5,8 @@ POST {{baseURL}}/auth/sign-in
 Content-Type: application/json
 
 {
-    "username": "admin",
-    "password": "321"
+    "username": "daniel",
+    "password": "123456"
 }
 
 ### Create Account
@@ -14,12 +14,12 @@ POST {{baseURL}}/users
 Content-Type: application/json
 
 {
-    "username": "admin",
-    "password": "123"
+    "username": "daniel",
+    "password": "123456"
 }
 
 ### Update Account
-PUT {{baseURL}}/users/1
+PUT {{baseURL}}/users/2
 Content-Type: application/json
 
 {
