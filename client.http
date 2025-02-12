@@ -1,0 +1,35 @@
+@baseURL=http://localhost:5000
+
+### Authenticate
+POST {{baseURL}}/auth/sign-in
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "321"
+}
+
+### Create Account
+POST {{baseURL}}/users
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "123"
+}
+
+### Update Account
+PUT {{baseURL}}/users/1
+Content-Type: application/json
+
+{
+    "password": "321"
+}
+
+### Sign Out
+GET {{baseURL}}/auth/sign-out
+Content-Type: application/json
+
+### Get User
+GET {{baseURL}}/users/1
+Content-Type: application/json
